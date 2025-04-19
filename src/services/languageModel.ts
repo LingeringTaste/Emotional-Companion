@@ -13,18 +13,21 @@ export class LanguageModelService {
     this.config = config;
   }
 
-  public async generateResponse(prompt: string, userInput: string): Promise<string> {
+  /**
+   * Get the appropriate prompt based on the character's prompt templates and current language
+   * @param promptTemplates Object containing prompts in different languages
+   * @returns The prompt in the current language or fallback to English
+   */
+  private getLocalizedPrompt(promptTemplates: {[key: string]: string}): string {
+    const currentLanguage = i18next.language || 'en';
+    // Use the prompt in the current language if available, otherwise fall back to English
+    return promptTemplates[currentLanguage] || promptTemplates['en'];
+  }
+
+  public async generateResponse(promptTemplates: {[key: string]: string}, userInput: string): Promise<string> {
     try {
-      // Get current language
-      const currentLanguage = i18next.language || 'en';
-      
-      // Adjust prompt based on language
-      let adjustedPrompt = prompt;
-      if (currentLanguage === 'zh') {
-        adjustedPrompt += " 请用中文回答.";
-      } else if (currentLanguage === 'es') {
-        adjustedPrompt += " Por favor, responde en español.";
-      }
+      // Get localized prompt based on current language
+      const localizedPrompt = this.getLocalizedPrompt(promptTemplates);
       
       const response = await fetch(`${this.config.endpoint}/openai/deployments/${this.config.deploymentName}/chat/completions?api-version=2023-05-15`, {
         method: 'POST',
@@ -34,7 +37,7 @@ export class LanguageModelService {
         },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: adjustedPrompt },
+            { role: 'system', content: localizedPrompt },
             { role: 'user', content: userInput }
           ],
           max_tokens: 800,
@@ -60,21 +63,13 @@ export class LanguageModelService {
   }
 
   public async streamingResponse(
-    prompt: string, 
+    promptTemplates: {[key: string]: string}, 
     userInput: string, 
     onToken: (token: string) => void
   ): Promise<string> {
     try {
-      // Get current language
-      const currentLanguage = i18next.language || 'en';
-      
-      // Adjust prompt based on language
-      let adjustedPrompt = prompt;
-      if (currentLanguage === 'zh') {
-        adjustedPrompt += " 请用中文回答.";
-      } else if (currentLanguage === 'es') {
-        adjustedPrompt += " Por favor, responde en español.";
-      }
+      // Get localized prompt based on current language
+      const localizedPrompt = this.getLocalizedPrompt(promptTemplates);
       
       const response = await fetch(`${this.config.endpoint}/openai/deployments/${this.config.deploymentName}/chat/completions?api-version=2023-05-15`, {
         method: 'POST',
@@ -84,7 +79,7 @@ export class LanguageModelService {
         },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: adjustedPrompt },
+            { role: 'system', content: localizedPrompt },
             { role: 'user', content: userInput }
           ],
           max_tokens: 800,

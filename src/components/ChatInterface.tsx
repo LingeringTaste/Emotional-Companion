@@ -72,7 +72,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     try {
       // Stream response tokens
       const fullResponse = await languageModelService.current.streamingResponse(
-        selectedCharacter.promptTemplate,
+        selectedCharacter.promptTemplates,
         text,
         (token) => {
           setCurrentStreamedResponse(prev => prev + token);

@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Compañero Emocional",
+    "subtitle": "Tu Compañero IA Interactivo Basado en Voz"
+  },
+  "character": {
+    "select": "Elige tu Compañero",
+    "talkingWith": "Hablando con {{name}}"
+  },
+  "chat": {
+    "startPrompt": "Comienza la conversación hablando con {{name}}",
+    "stopResponse": "Detener Respuesta",
+    "speak": "Hablar"
+  },
+  "characters": {
+    "gundam": {
+      "name": "Gundam",
+      "description": "Un valiente y noble piloto de mecha"
+    },
+    "ultraman": {
+      "name": "Ultraman",
+      "description": "Un poderoso héroe que protege la Tierra"
+    },
+    "conan": {
+      "name": "Detective Conan",
+      "description": "Un joven detective brillante"
+    },
+    "sunwukong": {
+      "name": "Rey Mono",
+      "description": "El legendario Sun Wukong"
+    },
+    "girlfriend": {
+      "name": "Novia",
+      "description": "Una novia cariñosa y comprensiva"
+    },
+    "boyfriend": {
+      "name": "Novio",
+      "description": "Un novio cariñoso y comprensivo"
+    }
+  },
+  "footer": {
+    "poweredBy": "Impulsado por Azure OpenAI y Azure Speech Services"
+  }
+} 

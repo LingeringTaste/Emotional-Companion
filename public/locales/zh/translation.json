@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "情感伙伴",
+    "subtitle": "您的交互式语音AI伙伴"
+  },
+  "character": {
+    "select": "选择您的伙伴",
+    "talkingWith": "正在与{{name}}交谈"
+  },
+  "chat": {
+    "startPrompt": "开始对{{name}}说话以开始对话",
+    "stopResponse": "停止回应",
+    "speak": "说话"
+  },
+  "characters": {
+    "gundam": {
+      "name": "高达",
+      "description": "勇敢高尚的机甲驾驶员"
+    },
+    "ultraman": {
+      "name": "奥特曼",
+      "description": "保护地球的强大英雄"
+    },
+    "conan": {
+      "name": "名侦探柯南",
+      "description": "才华横溢的年轻侦探"
+    },
+    "sunwukong": {
+      "name": "孙悟空",
+      "description": "传说中的齐天大圣"
+    },
+    "girlfriend": {
+      "name": "女朋友",
+      "description": "关怀和支持您的女朋友"
+    },
+    "boyfriend": {
+      "name": "男朋友",
+      "description": "关怀和支持您的男朋友"
+    }
+  },
+  "footer": {
+    "poweredBy": "由Azure OpenAI和Azure语音服务提供支持"
+  }
+} 

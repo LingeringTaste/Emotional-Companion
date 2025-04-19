@@ -1,0 +1,44 @@
+{
+  "app": {
+    "title": "Emotional Companion",
+    "subtitle": "Your Interactive Voice-Based AI Companion"
+  },
+  "character": {
+    "select": "Choose Your Companion",
+    "talkingWith": "Talking with {{name}}"
+  },
+  "chat": {
+    "startPrompt": "Start the conversation by speaking to {{name}}",
+    "stopResponse": "Stop Response",
+    "speak": "Speak"
+  },
+  "characters": {
+    "gundam": {
+      "name": "Gundam",
+      "description": "A brave and noble mecha pilot"
+    },
+    "ultraman": {
+      "name": "Ultraman",
+      "description": "A powerful hero protecting Earth"
+    },
+    "conan": {
+      "name": "Detective Conan",
+      "description": "A brilliant young detective"
+    },
+    "sunwukong": {
+      "name": "Monkey King",
+      "description": "The legendary Sun Wukong"
+    },
+    "girlfriend": {
+      "name": "Girlfriend",
+      "description": "A caring and supportive girlfriend"
+    },
+    "boyfriend": {
+      "name": "Boyfriend",
+      "description": "A caring and supportive boyfriend"
+    }
+  },
+  "footer": {
+    "poweredBy": "Powered by Azure OpenAI and Azure Speech Services"
+  }
+} 

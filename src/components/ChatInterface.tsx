@@ -5,6 +5,14 @@ import { Character } from '../models/Character';
 import VoiceRecorder from './VoiceRecorder';
 import { LanguageModelService } from '../services/languageModel';
 import { TextToSpeechService } from '../services/textToSpeech';
+import { 
+  sanitizeInput, 
+  validateInput, 
+  filterContent, 
+  checkRateLimit, 
+  generateSessionId,
+  createSecureErrorMessage 
+} from '../utils/security';
 
 interface ChatInterfaceProps {
   selectedCharacter: Character;
@@ -34,6 +42,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isResponding, setIsResponding] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamedResponse, setCurrentStreamedResponse] = useState('');
+  const [sessionId] = useState(() => generateSessionId());
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   const languageModelService = useRef<LanguageModelService>(
     new LanguageModelService(languageModelConfig)
@@ -54,10 +64,33 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handleUserInput = async (text: string) => {
+    // Clear any previous error messages
+    setErrorMessage('');
+
+    // Security checks
+    if (!checkRateLimit(sessionId)) {
+      setErrorMessage(t('errors.rateLimitExceeded', { defaultValue: 'Too many requests. Please wait a moment.' }));
+      return;
+    }
+
+    // Sanitize and validate input
+    const sanitizedText = sanitizeInput(text);
+    const validation = validateInput(sanitizedText);
+    if (!validation.isValid) {
+      setErrorMessage(validation.reason || t('errors.invalidInput', { defaultValue: 'Invalid input provided.' }));
+      return;
+    }
+
+    const contentFilter = filterContent(sanitizedText);
+    if (!contentFilter.isAllowed) {
+      setErrorMessage(contentFilter.reason || t('errors.contentViolation', { defaultValue: 'Content violates usage policy.' }));
+      return;
+    }
+
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: text,
+      content: sanitizedText,
       isUser: true,
       timestamp: new Date()
     };
@@ -73,7 +106,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // Stream response tokens
       const fullResponse = await languageModelService.current.streamingResponse(
         selectedCharacter.promptTemplates,
-        text,
+        sanitizedText,
         (token) => {
           setCurrentStreamedResponse(prev => prev + token);
         }
@@ -109,10 +142,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         // Play the audio
         textToSpeechService.current.playAudio(audioUrl);
       } catch (error) {
-        console.error('Error converting text to speech:', error);
+        const secureError = createSecureErrorMessage(error, t('errors.speechSynthesis', { defaultValue: 'Unable to generate speech' }));
+        setErrorMessage(secureError);
       }
     } catch (error) {
-      console.error('Error getting response:', error);
+      const secureError = createSecureErrorMessage(error, t('errors.aiResponse', { defaultValue: 'Unable to get response from AI' }));
+      setErrorMessage(secureError);
     } finally {
       setIsResponding(false);
       setIsStreaming(false);
@@ -135,6 +170,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
       
       <div className="messages-container">
+        {errorMessage && (
+          <div className="error-message">
+            <p>⚠️ {errorMessage}</p>
+            <button onClick={() => setErrorMessage('')} className="dismiss-error">×</button>
+          </div>
+        )}
+        
         {messages.length === 0 ? (
           <div className="empty-state">
             <p>{t('chat.startPrompt', { name: t(`characters.${selectedCharacter.id}.name`) })}</p>
@@ -294,6 +336,38 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         
         .streaming {
           opacity: 0.8;
+        }
+        
+        .error-message {
+          background-color: #ffebee;
+          border: 1px solid #f44336;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 15px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          color: #c62828;
+        }
+        
+        .error-message p {
+          margin: 0;
+          flex: 1;
+        }
+        
+        .dismiss-error {
+          background: none;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          color: #c62828;
+          padding: 0 5px;
+          margin-left: 10px;
+        }
+        
+        .dismiss-error:hover {
+          background-color: rgba(244, 67, 54, 0.1);
+          border-radius: 50%;
         }
         
         .input-area {

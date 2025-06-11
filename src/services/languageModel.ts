@@ -1,4 +1,5 @@
 import i18next from 'i18next';
+import { UsageTracker } from './usageTracker';
 
 interface LanguageModelConfig {
   endpoint: string;
@@ -11,6 +12,10 @@ export class LanguageModelService {
 
   constructor(config: LanguageModelConfig) {
     this.config = config;
+    this.usageTracker = new UsageTracker();
+
+this.usageTracker = new UsageTracker();
+  private usageTracker: UsageTracker;
   }
 
   /**

@@ -16,6 +16,22 @@ An interactive voice-based AI companion web application that allows users to hav
   - Azure OpenAI service with GPT-4o model deployed
   - Azure Speech service
 
+## ⚠️ SECURITY NOTICE
+
+**CRITICAL**: This application currently has security vulnerabilities that need immediate attention. Please read the [Security Report](SECURITY_REPORT.md) and [Implementation Guide](SECURITY_IMPLEMENTATION_GUIDE.md) before deploying to production.
+
+### Key Security Issues:
+- API keys exposed in client-side code
+- Missing input validation and rate limiting
+- Outdated dependencies with known vulnerabilities
+
+### Quick Security Fix:
+1. Implement the secure backend template in `/backend-template/`
+2. Move all API keys to server-side environment variables
+3. Update dependencies: `npm install`
+
 ## Configuration
+
+⚠️ **IMPORTANT**: The current configuration exposes API keys in the browser. For production use, implement the secure backend template.
 
 Create a `.env` file in the root of the project with the following variables: 

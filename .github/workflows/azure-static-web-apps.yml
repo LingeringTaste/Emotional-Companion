@@ -1,37 +1,73 @@
-   name: Azure Static Web Apps CI/CD
+name: Azure Static Web Apps CI/CD
 
-   on:
-     push:
-       branches:
-         - main  # or your default branch
-     pull_request:
-       types: [opened, synchronize, reopened]
-       branches:
-         - main  # or your default branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
-   jobs:
-     build_and_deploy_job:
-       runs-on: ubuntu-latest
-       name: Build and Deploy Job
-       steps:
-         - name: Checkout GitHub Action
-           uses: actions/checkout@v2
+permissions:
+  contents: read
+  pull-requests: write
 
-         - name: Set up Node.js
-           uses: actions/setup-node@v2
-           with:
-             node-version: '14'  # Use the Node.js version your app requires
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        
+      - name: Run dependency check
+        run: npx audit-ci --moderate
 
-         - name: Install and Build
-           run: |
-             npm install
-             npm run build
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    needs: security_scan
+    steps:
+      - name: Checkout GitHub Action
+        uses: actions/checkout@v4
 
-         - name: Deploy to Azure Static Web Apps
-           uses: Azure/static-web-apps-deploy@v1
-           with:
-             azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-             repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for GitHub integrations (i.e. PR comments)
-             action: 'upload'
-             app_location: '/' # The root of your React app
-             output_location: 'build' # The build output directory
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test -- --coverage --ci --watchAll=false
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Note: These should be moved to backend in production
+          REACT_APP_AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          REACT_APP_AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          app_location: '/'
+          output_location: 'build'
